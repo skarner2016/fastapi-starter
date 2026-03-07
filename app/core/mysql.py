@@ -19,7 +19,7 @@ async_engine = create_async_engine(
     pool_pre_ping=True,
     max_overflow=10,
     pool_timeout=30,
-    echo=settings.app_debug  # 生产环境关闭
+    echo=settings.sql_log
 )
 
 # 会话工厂
@@ -34,7 +34,7 @@ Base = declarative_base()
 
 
 # 依赖项
-def get_db() -> Session:
+def get_mysql_pool() -> Session:
     """Get sync database session"""
     db = sessionmaker(sync_engine)()
     try:
@@ -43,7 +43,7 @@ def get_db() -> Session:
         db.close()
 
 
-async def get_async_db() -> AsyncSession:
+async def get_async_mysql_pool() -> AsyncSession:
     """Get async database session"""
     async with AsyncSessionLocal() as session:
         try:
@@ -52,11 +52,11 @@ async def get_async_db() -> AsyncSession:
             await session.close()
 
 
-async def init_db():
+async def init_mysql_pool():
     """Initialize database"""
     pass
 
 
-async def close_db():
+async def close_mysql_pool():
     """Close database connection"""
     await async_engine.dispose()

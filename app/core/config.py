@@ -11,10 +11,13 @@ class Settings(BaseSettings):
     app_name: str = "fastapi-starter"
     app_version: str = "0.1.0"
     app_debug: bool = False
+    app_timezone: str = "Asia/Shanghai"
 
     # Log
     log_level: str = "info"
     log_dir: str = "runtime/logs"
+    sql_log: bool = False
+    log_backup_day: int = 30
 
     # MySQL
     mysql_host: str = "localhost"
@@ -25,10 +28,23 @@ class Settings(BaseSettings):
     mysql_pool_size: int = 10
     mysql_pool_recycle: int = 3600
 
+    # Redis
+    redis_host: str = "localhost"
+    redis_port: int = 6379
+    redis_password: str = ""
+    redis_db: int = 0
+
     @property
     def mysql_url(self) -> str:
         """Get MySQL connection URL"""
         return f"mysql://{self.mysql_user}:{self.mysql_password}@{self.mysql_host}:{self.mysql_port}/{self.mysql_database}"
+
+    @property
+    def redis_url(self) -> str:
+        """Get Redis connection URL"""
+        if self.redis_password:
+            return f"redis://:{self.redis_password}@{self.redis_host}:{self.redis_port}/{self.redis_db}"
+        return f"redis://{self.redis_host}:{self.redis_port}/{self.redis_db}"
 
 
 # Create settings instance
