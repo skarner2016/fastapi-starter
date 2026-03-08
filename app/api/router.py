@@ -4,6 +4,7 @@ from sqlalchemy import select
 from app.core.context import get_mysql_pool
 from app.core.redis_context import get_redis
 from app.core import get_logger
+from app.core.config import settings
 from app.model import UserModel
 import asyncio
 import time
@@ -181,14 +182,23 @@ async def stream_timestamps(seconds: int = Query(..., description="Number of sec
     logger.info(f"Streaming timestamps for {seconds} seconds")
     
     async def timestamp_generator():
-        for _ in range(seconds):
+        start_time = time.time()
+        timeout_seconds = settings.app_timeout
+        
+        for i in range(seconds):
+            # 检查是否超时
+            elapsed_time = time.time() - start_time
+            if elapsed_time >= timeout_seconds:
+                logger.warning(f"Stream timeout after {elapsed_time:.2f} seconds")
+                yield f"Error: Stream timeout after {timeout_seconds} seconds\n"
+                return
+            
             current_time = time.time()
             yield f"Timestamp: {current_time}\n"
             await asyncio.sleep(1)
-            # 检查是否超时
-            logger.info(f"Stream completed {time.time()} seconds")
             
-        yield f"Success: Stream completed after {seconds} seconds\n"
+        elapsed_time = time.time() - start_time
+        yield f"Success: Stream completed after {elapsed_time:.2f} seconds\n"
     
     return StreamingResponse(timestamp_generator(), media_type="text/plain")
 
