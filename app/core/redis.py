@@ -5,7 +5,7 @@ from app.core import settings
 redis_pool = None
 
 
-async def init_redis():
+async def init_redis_pool():
     """初始化 Redis 连接池"""
     global redis_pool
     if redis_pool is None:
@@ -16,7 +16,7 @@ async def init_redis():
         )
 
 
-async def close_redis():
+async def close_redis_pool():
     """关闭 Redis 连接池"""
     global redis_pool
     if redis_pool:
@@ -24,8 +24,8 @@ async def close_redis():
         redis_pool = None
 
 
-async def get_redis():
+async def get_redis_pool():
     """获取 Redis 连接"""
     if redis_pool is None:
-        await init_redis()
+        await init_redis_pool()
     return redis.Redis(connection_pool=redis_pool)

@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from app.core import init_mysql_pool, close_mysql_pool, init_redis, close_redis, init_logging
+from app.core import init_mysql_pool, close_mysql_pool, init_redis_pool, close_redis_pool, init_logging
 from fastapi import FastAPI
 from app.api import api_router
 from app.core import settings
@@ -21,14 +21,14 @@ async def lifespan(app: FastAPI):
     await init_mysql_pool()
     print("Database initialized")
     
-    await init_redis()
+    await init_redis_pool()
     print("Redis initialized")
     
     yield
     # Shutdown
     print("Shutting down...")
     
-    await close_redis()
+    await close_redis_pool()
     print("Redis closed")
     
     await close_mysql_pool()
