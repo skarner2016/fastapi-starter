@@ -6,6 +6,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 import pytest
 import pytest_asyncio
+import time
 from fastapi import Request, FastAPI
 from httpx import AsyncClient, ASGITransport
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -247,3 +248,37 @@ async def test_get_user_from_cache(async_client):
     data2 = response2.json()
     assert data2["code"] == 0
     assert data2["source"] == "cache"
+
+
+@pytest.mark.asyncio
+async def test_stream_timestamps(async_client):
+    """Test stream timestamps endpoint"""
+    # Test with 2 seconds to keep the test fast
+    seconds = 2
+    start_time = time.time()
+    
+    # Send request to streaming endpoint
+    async with async_client.stream("GET", f"/stream/timestamps?seconds={seconds}") as response:
+        assert response.status_code == 200
+        assert response.headers["content-type"] == "text/plain; charset=utf-8"
+        
+        # Read the streaming response
+        lines = []
+        async for line in response.aiter_lines():
+            if line:
+                lines.append(line)
+        
+        # Verify we received the expected number of timestamps
+        # We should get 'seconds' timestamp lines plus 1 success line
+        assert len(lines) == seconds + 1
+        
+        # Verify the first 'seconds' lines are timestamps
+        for i in range(seconds):
+            assert lines[i].startswith("Timestamp:")
+        
+        # Verify the last line is the success message
+        assert lines[-1] == f"Success: Stream completed after {seconds} seconds"
+    
+    # Verify the request took at least 'seconds' seconds
+    elapsed_time = time.time() - start_time
+    assert elapsed_time >= seconds

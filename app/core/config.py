@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     app_version: str = "0.1.0"
     app_debug: bool = False
     app_timezone: str = "Asia/Shanghai"
+    app_timeout: int = 30
 
     # Log
     log_level: str = "info"

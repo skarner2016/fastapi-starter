@@ -1,9 +1,12 @@
 from fastapi import APIRouter, Query
+from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 from app.core.context import get_mysql_pool
 from app.core.redis_context import get_redis
 from app.core import get_logger
 from app.model import UserModel
+import asyncio
+import time
 
 api_router = APIRouter()
 # 使用默认日志（app_name）
@@ -170,3 +173,30 @@ async def get_user_from_cache(user_id: int):
     
     logger.warning(f"User not found with ID: {user_id}")
     return {"code": 404, "message": "User not found"}
+
+
+@api_router.get("/stream/timestamps")
+async def stream_timestamps(seconds: int = Query(..., description="Number of seconds to stream timestamps")):
+    """Stream timestamps every second for M seconds"""
+    logger.info(f"Streaming timestamps for {seconds} seconds")
+    
+    async def timestamp_generator():
+        for _ in range(seconds):
+            current_time = time.time()
+            yield f"Timestamp: {current_time}\n"
+            await asyncio.sleep(1)
+            # 检查是否超时
+            logger.info(f"Stream completed {time.time()} seconds")
+            
+        yield f"Success: Stream completed after {seconds} seconds\n"
+    
+    return StreamingResponse(timestamp_generator(), media_type="text/plain")
+
+
+@api_router.get("/test/timeout")
+async def test_timeout(sleep_seconds: int = Query(default=15, description="Seconds to sleep")):
+    """Test timeout functionality - sleeps for specified seconds"""
+    logger.info(f"Test timeout endpoint started, will sleep for {sleep_seconds} seconds")
+    await asyncio.sleep(sleep_seconds)
+    logger.info(f"Test timeout endpoint completed")
+    return {"message": f"Slept for {sleep_seconds} seconds"}
