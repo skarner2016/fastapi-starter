@@ -90,7 +90,7 @@ if __name__ == "__main__":
     port = 8000
     
     # 根据环境配置参数
-    if settings.app_env == "development":
+    if settings.app_env != "prd":
         uvicorn.run(app_module, host=host, port=port, reload=True, access_log=False)
     else:
         uvicorn.run(app_module, host=host, port=port, reload=False, workers=4, access_log=False)

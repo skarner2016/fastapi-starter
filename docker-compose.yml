@@ -1,0 +1,22 @@
+services:
+  api:
+      build:
+        context: .
+        dockerfile: Dockerfile
+      image: fastapi-starter
+      volumes:
+        - ./:/app
+      mem_limit: 4096m        # 最大内存（对应limits）
+      mem_reservation: 256m   # 预留内存256MB（对应reservations）
+      ports:
+        - "${APP_PORT:-8000}:8000"
+      restart: unless-stopped
+      command: >
+        uv run python -m app.main
+      networks:
+        - docker-local #连接到自定义的网络
+
+networks:
+  docker-local:
+    external: true  # 重要：使用外部已存在的网络
+    

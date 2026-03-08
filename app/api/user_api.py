@@ -57,7 +57,7 @@ async def login(request: LoginRequest):
     await redis_conn.delete(email)
 
     # 登录系统，返回 jwt_token
-    return ApiResponseSuccess(data={"jwt_token": jwt_token, "token_type": "Bearer"})
+    return ApiResponseSuccess(data={"jwt_token": f"Bearer {jwt_token}"})
 
 
 @user_router.post("/info")
