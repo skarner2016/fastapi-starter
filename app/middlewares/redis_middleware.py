@@ -1,6 +1,6 @@
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
-from app.core.redis_context import set_redis, reset_redis
+from app.core.context import set_redis, reset_redis
 from app.core.redis import get_redis_pool
 
 

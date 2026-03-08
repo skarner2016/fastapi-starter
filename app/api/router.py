@@ -2,7 +2,7 @@ from fastapi import APIRouter, Query, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 from app.core.context import get_mysql_pool
-from app.core.redis_context import get_redis
+from app.core.context import get_redis
 from app.core import get_logger
 from app.core.config import settings
 from app.model import UserModel

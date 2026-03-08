@@ -3,10 +3,10 @@ from app.core import init_mysql_pool, close_mysql_pool, init_redis_pool, close_r
 from fastapi import FastAPI
 from app.api import api_router
 from app.core import settings
-from app.core.middleware import DBSessionMiddleware
-from app.core.redis_middleware import RedisSessionMiddleware
-from app.core.logging_middleware import LoggingMiddleware
-from app.core.timeout_middleware import TimeoutMiddleware
+from app.middlewares.mysql_middleware import DBSessionMiddleware
+from app.middlewares.redis_middleware import RedisSessionMiddleware
+from app.middlewares.logging_middleware import LoggingMiddleware
+from app.middlewares.timeout_middleware import TimeoutMiddleware
 
 
 @asynccontextmanager

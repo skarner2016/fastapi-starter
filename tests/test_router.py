@@ -15,8 +15,8 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import NullPool
 from app.api import api_router
 from app.core.context import set_mysql_pool, reset_mysql_pool
-from app.core.redis_context import set_redis, reset_redis
-from app.core.logging_middleware import LoggingMiddleware
+from app.core.context import set_redis, reset_redis
+from app.middlewares.logging_middleware import LoggingMiddleware
 from app.core import settings
 
 
