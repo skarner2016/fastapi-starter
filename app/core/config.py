@@ -7,10 +7,9 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
     # App
-    app_env: str = "development"
+    app_env: str = "dev"
     app_name: str = "fastapi-starter"
     app_version: str = "0.1.0"
-    app_debug: bool = False
     app_timezone: str = "Asia/Shanghai"
     app_timeout: int = 30
 

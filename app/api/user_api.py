@@ -36,7 +36,7 @@ async def login(request: LoginRequest):
         return ApiResponseFail(message="验证码过期或不存在")
 
     if cached_code != code:
-        return ApiResponseFail(message="验证码错误")    
+        return ApiResponseFail(message="验证码错误")
 
     # 判断 email 是否一已注册
     mysql_pool = get_mysql_pool()
@@ -78,7 +78,7 @@ async def info(request: Request):
     if user is None:
         return ApiResponseFail(message="用户不存在")
 
-    return ApiResponseSuccess(  
+    return ApiResponseSuccess(
         data=InfoResponse(
             email=user.email, name=user.name, created_at=user.created_at
         ).model_dump(),

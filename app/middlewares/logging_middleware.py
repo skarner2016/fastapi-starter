@@ -1,6 +1,8 @@
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 import uuid
+import time
+import json
 from app.core.logging import set_trace_id, reset_trace_id, get_logger
 
 # 使用默认日志（app_name）
@@ -19,20 +21,38 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         trace_id = str(uuid.uuid4())
         set_trace_id(trace_id)
         
-        # 记录请求开始
-        logger.info(f"Request started: {request.method} {request.url.path}")
+        # 记录开始时间
+        start_time = time.time()
         
         try:
             # 处理请求（这会进入内层中间件）
             response = await call_next(request)
             
-            # 记录请求结束
-            logger.info(f"Request completed: {request.method} {request.url.path} {response.status_code}")
+            # 计算响应时间（毫秒）
+            duration_ms = (time.time() - start_time) * 1000
+            
+            # 记录请求完成（JSON 格式）
+            log_data = {
+                "method": request.method,
+                "path": request.url.path,
+                "status": response.status_code,
+                "duration_ms": round(duration_ms, 2)
+            }
+            logger.info(json.dumps(log_data))
             
             return response
         except Exception as e:
-            # 记录异常
-            logger.error(f"Request failed: {request.method} {request.url.path}", exc_info=True)
+            # 计算响应时间（毫秒）
+            duration_ms = (time.time() - start_time) * 1000
+            
+            # 记录异常（JSON 格式）
+            log_data = {
+                "method": request.method,
+                "path": request.url.path,
+                "duration_ms": round(duration_ms, 2),
+                "error": str(e)
+            }
+            logger.error(json.dumps(log_data), exc_info=True)
             raise
         finally:
             # 重置 trace_id - 确保在数据库会话关闭后才执行
