@@ -15,7 +15,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import NullPool
 from app.api import api_router
 from app.core.context import set_mysql_pool, reset_mysql_pool
-from app.core.context import set_redis, reset_redis
+from app.core.context import set_redis_pool, reset_redis_pool
 from app.middlewares.logging_middleware import LoggingMiddleware
 from app.core import settings
 
@@ -70,12 +70,12 @@ class _TestRedisMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         from app.core.redis import get_redis_pool
         redis_conn = await get_redis_pool()
-        set_redis(redis_conn)
+        set_redis_pool(redis_conn)
         try:
             response = await call_next(request)
             return response
         finally:
-            reset_redis()
+            reset_redis_pool()
 
 
 @pytest_asyncio.fixture(scope="session")

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Query, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 from app.core.context import get_mysql_pool
-from app.core.context import get_redis
+from app.core.context import get_redis_pool
 from app.core import get_logger
 from app.core.config import settings
 from app.model import UserModel
@@ -104,7 +104,7 @@ async def delete_user(user_id: int):
 async def test_redis(key: str = Query(...), value: str = Query(...)):
     """Test Redis functionality - 使用 ContextVar 获取 Redis 连接"""
     logger.info(f"Testing Redis with key: {key}")
-    redis_conn = get_redis()
+    redis_conn = get_redis_pool()
     await redis_conn.set(key, value)
     stored_value = await redis_conn.get(key)
     logger.info(f"Redis test completed for key: {key}")
@@ -115,7 +115,7 @@ async def test_redis(key: str = Query(...), value: str = Query(...)):
 async def get_redis_value(key: str):
     """Get value from Redis - 使用 ContextVar 获取 Redis 连接"""
     logger.info(f"Getting Redis value for key: {key}")
-    redis_conn = get_redis()
+    redis_conn = get_redis_pool()
     value = await redis_conn.get(key)
     if value:
         logger.info(f"Found Redis value for key: {key}")
@@ -128,7 +128,7 @@ async def get_redis_value(key: str):
 async def delete_redis_key(key: str):
     """Delete key from Redis - 使用 ContextVar 获取 Redis 连接"""
     logger.info(f"Deleting Redis key: {key}")
-    redis_conn = get_redis()
+    redis_conn = get_redis_pool()
     await redis_conn.delete(key)
     logger.info(f"Deleted Redis key: {key}")
     return {"code": 0, "message": "Key deleted"}
@@ -138,7 +138,7 @@ async def delete_redis_key(key: str):
 async def get_user_from_cache(user_id: int):
     """Get user from cache - 从 Redis 缓存中获取用户数据"""
     logger.info(f"Getting user from cache: {user_id}")
-    redis_conn = get_redis()
+    redis_conn = get_redis_pool()
     
     # 构建 Redis 键
     cache_key = f"user:{user_id}"

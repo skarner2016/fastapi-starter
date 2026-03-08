@@ -1,6 +1,6 @@
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
-from app.core.context import set_redis, reset_redis
+from app.core.context import set_redis_pool, reset_redis_pool
 from app.core.redis import get_redis_pool
 
 
@@ -15,7 +15,7 @@ class RedisSessionMiddleware(BaseHTTPMiddleware):
         redis_conn = await get_redis_pool()
         
         # 设置到上下文变量
-        set_redis(redis_conn)
+        set_redis_pool(redis_conn)
         
         try:
             # 处理请求
@@ -23,4 +23,4 @@ class RedisSessionMiddleware(BaseHTTPMiddleware):
             return response
         finally:
             # 清理上下文变量
-            reset_redis()
+            reset_redis_pool()

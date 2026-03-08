@@ -32,11 +32,11 @@ def reset_mysql_pool() -> None:
     mysql_pool_session.set(None)
 
 
-def get_redis() -> redis.Redis:
+def get_redis_pool() -> redis.Redis:
     """获取当前请求的 Redis 连接
     
     使用方式：
-        redis_conn = get_redis()
+        redis_conn = get_redis_pool()
         await redis_conn.set('key', 'value')
     """
     client = redis_pool_session.get()
@@ -45,11 +45,11 @@ def get_redis() -> redis.Redis:
     return client
 
 
-def set_redis(client: redis.Redis) -> None:
+def set_redis_pool(client: redis.Redis) -> None:
     """设置当前请求的 Redis 连接（由中间件调用）"""
     redis_pool_session.set(client)
 
 
-def reset_redis() -> None:
+def reset_redis_pool() -> None:
     """重置 Redis 连接（由中间件调用）"""
     redis_pool_session.set(None)
