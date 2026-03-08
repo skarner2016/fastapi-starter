@@ -6,7 +6,6 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 import pytest
 import pytest_asyncio
-import asyncio
 from fastapi import Request, FastAPI
 from httpx import AsyncClient, ASGITransport
 from starlette.middleware.base import BaseHTTPMiddleware
