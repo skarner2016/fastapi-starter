@@ -282,3 +282,73 @@ async def test_stream_timestamps(async_client):
     # Verify the request took at least 'seconds' seconds
     elapsed_time = time.time() - start_time
     assert elapsed_time >= seconds
+
+
+@pytest.mark.asyncio
+async def test_login_success(async_client):
+    """Test login endpoint - successful login"""
+    response = await async_client.post("/auth/login", json={
+        "username": "admin",
+        "password": "123456"
+    })
+    assert response.status_code == 200
+    data = response.json()
+    assert data["code"] == 0
+    assert data["message"] == "Login successful"
+    assert "jwt_token" in data["data"]
+    assert data["data"]["token_type"] == "Bearer"
+    assert data["data"]["expires_in"] == 86400
+
+
+@pytest.mark.asyncio
+async def test_login_failure(async_client):
+    """Test login endpoint - failed login"""
+    response = await async_client.post("/auth/login", json={
+        "username": "admin",
+        "password": "wrongpassword"
+    })
+    assert response.status_code == 401
+    data = response.json()
+    assert data["detail"] == "Invalid username or password"
+
+
+@pytest.mark.asyncio
+async def test_user_info(async_client):
+    """Test user info endpoint"""
+    # First login to get a token
+    login_response = await async_client.post("/auth/login", json={
+        "username": "admin",
+        "password": "123456"
+    })
+    token = login_response.json()["data"]["jwt_token"]
+    
+    # Test user info endpoint with the token
+    response = await async_client.get("/user/info", headers={
+        "Authorization": f"Bearer {token}"
+    })
+    assert response.status_code == 200
+    data = response.json()
+    assert data["code"] == 0
+    assert data["message"] == "Success"
+    assert "user_info" in data["data"]
+    user_info = data["data"]["user_info"]
+    assert user_info["sub"] == "admin"
+    assert "iat" in user_info
+    assert "exp" in user_info
+    assert user_info["type"] == "access"
+
+
+@pytest.mark.asyncio
+async def test_user_info_no_token(async_client):
+    """Test user info endpoint - no token"""
+    response = await async_client.get("/user/info")
+    assert response.status_code == 401
+    
+
+@pytest.mark.asyncio
+async def test_user_info_invalid_token(async_client):
+    """Test user info endpoint - invalid token"""
+    response = await async_client.get("/user/info", headers={
+        "Authorization": "Bearer invalid_token"
+    })
+    assert response.status_code == 401

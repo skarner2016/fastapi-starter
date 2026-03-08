@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 from app.core.context import get_mysql_pool
@@ -8,6 +8,9 @@ from app.core.config import settings
 from app.model import UserModel
 import asyncio
 import time
+import jwt
+from datetime import datetime, timedelta, timezone
+from pydantic import BaseModel
 
 api_router = APIRouter()
 # 使用默认日志（app_name）
@@ -210,3 +213,97 @@ async def test_timeout(sleep_seconds: int = Query(default=15, description="Secon
     await asyncio.sleep(sleep_seconds)
     logger.info(f"Test timeout endpoint completed")
     return {"message": f"Slept for {sleep_seconds} seconds"}
+
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+
+class LoginResponse(BaseModel):
+    code: int
+    message: str
+    data: dict
+
+
+@api_router.post("/auth/login", response_model=LoginResponse)
+async def login(request: LoginRequest):
+    """用户登录接口 - 返回 JWT Token"""
+    logger.info(f"Login attempt for user: {request.username}")
+
+    # 简单验证（实际项目中应该查询数据库验证密码）
+    # 这里使用硬编码的测试账号作为示例
+    if request.username != "admin" or request.password != "123456":
+        logger.warning(f"Login failed for user: {request.username}")
+        raise HTTPException(status_code=401, detail="Invalid username or password")
+
+    # 创建 JWT payload
+    now = datetime.now(timezone.utc)
+    payload = {
+        "sub": request.username,  # 主题（用户标识）
+        "iat": now,  # 签发时间
+        "exp": now + timedelta(seconds=settings.jwt_expiration),  # 过期时间
+        "type": "access"
+    }
+
+    # 生成 JWT Token
+    jwt_token = jwt.encode(
+        payload,
+        settings.jwt_secret,
+        algorithm=settings.jwt_algorithm
+    )
+
+    logger.info(f"Login successful for user: {request.username}")
+
+    return LoginResponse(
+        code=0,
+        message="Login successful",
+        data={
+            "jwt_token": jwt_token,
+            "token_type": "Bearer",
+            "expires_in": settings.jwt_expiration
+        }
+    )
+
+
+@api_router.get("/user/info")
+async def get_user_info(request: Request):
+    """获取用户信息 - 解析 JWT token 并返回 payload"""
+    logger.info("User info endpoint accessed")
+
+    # 从 header 中获取 Authorization
+    authorization = request.headers.get("Authorization")
+    
+    # 从 Authorization header 中提取 token
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Invalid authorization header format")
+    
+    token = authorization.split(" ")[1]
+    
+    try:
+        # 解析 JWT token
+        payload = jwt.decode(
+            token,
+            settings.jwt_secret,
+            algorithms=[settings.jwt_algorithm]
+        )
+        
+        logger.info(f"Token decoded successfully for user: {payload.get('sub')}")
+        
+        return {
+            "code": 0,
+            "message": "Success",
+            "data": {
+                "user_info": payload
+            }
+        }
+        
+    except jwt.ExpiredSignatureError:
+        logger.warning("Token has expired")
+        raise HTTPException(status_code=401, detail="Token has expired")
+    except jwt.InvalidTokenError:
+        logger.warning("Invalid token")
+        raise HTTPException(status_code=401, detail="Invalid token")
+    except Exception as e:
+        logger.error(f"Error decoding token: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")

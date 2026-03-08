@@ -35,6 +35,11 @@ class Settings(BaseSettings):
     redis_password: str = ""
     redis_db: int = 0
 
+    # JWT
+    jwt_secret: str = "your-secret-key-change-in-production"
+    jwt_algorithm: str = "HS256"
+    jwt_expiration: int = 86400  # 24 hours in seconds
+
     @property
     def mysql_url(self) -> str:
         """Get MySQL connection URL"""
