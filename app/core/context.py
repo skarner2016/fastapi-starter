@@ -8,6 +8,28 @@ mysql_pool_session: ContextVar[AsyncSession | None] = ContextVar('mysql_pool_ses
 # 全局上下文变量，存储当前请求的 Redis 连接
 redis_pool_session: ContextVar[redis.Redis | None] = ContextVar('redis_pool_session', default=None)
 
+# 全局上下文变量，存储当前用户 ID
+current_user_id: ContextVar[str | None] = ContextVar('current_user_id', default=None)
+
+
+def get_current_user_id() -> str | None:
+    """获取当前用户 ID
+    
+    使用方式：
+        user_id = get_current_user_id()
+    """
+    return current_user_id.get()
+
+
+def set_current_user_id(user_id: str) -> None:
+    """设置当前用户 ID（由 JWT 中间件调用）"""
+    current_user_id.set(user_id)
+
+
+def reset_current_user_id() -> None:
+    """重置当前用户 ID（由 JWT 中间件调用）"""
+    current_user_id.set(None)
+
 
 def get_mysql_pool() -> AsyncSession:
     """获取当前请求的数据库会话

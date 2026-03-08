@@ -7,6 +7,7 @@ from app.middlewares.mysql_middleware import DBSessionMiddleware
 from app.middlewares.redis_middleware import RedisSessionMiddleware
 from app.middlewares.logging_middleware import LoggingMiddleware
 from app.middlewares.timeout_middleware import TimeoutMiddleware
+from app.middlewares.jwt_middleware import JWTMiddleware
 
 
 @asynccontextmanager
@@ -42,8 +43,9 @@ def init_app() -> FastAPI:
     中间件执行顺序（从内到外，按添加顺序的逆序）：
     1. RedisSessionMiddleware（最先添加，最内层）
     2. DBSessionMiddleware
-    3. TimeoutMiddleware
-    4. LoggingMiddleware（最后添加，最外层，最后清理 trace_id）
+    3. JWTMiddleware
+    4. TimeoutMiddleware
+    5. LoggingMiddleware（最后添加，最外层，最后清理 trace_id）
     """
     app = FastAPI(
         title=settings.app_name,
@@ -61,10 +63,13 @@ def init_app() -> FastAPI:
     # 2. 添加数据库会话中间件
     app.add_middleware(DBSessionMiddleware)
     
-    # 3. 添加超时中间件
+    # 3. 添加 JWT 中间件
+    app.add_middleware(JWTMiddleware)
+    
+    # 4. 添加超时中间件
     app.add_middleware(TimeoutMiddleware)
     
-    # 4. 添加日志中间件（最外层，最后执行 finally 清理 trace_id）
+    # 5. 添加日志中间件（最外层，最后执行 finally 清理 trace_id）
     app.add_middleware(LoggingMiddleware)
     
     app.include_router(api_router)
