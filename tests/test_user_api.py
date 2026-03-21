@@ -12,10 +12,10 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import NullPool
-from app.api import api_router
+from app.api.router import api_router
 from app.core.context import set_mysql_pool, reset_mysql_pool
 from app.core.context import set_redis_pool, reset_redis_pool, get_redis_pool
-from app.core import settings
+from app.core.config import settings
 from app.middlewares.logging_middleware import LoggingMiddleware
 from app.middlewares.jwt_middleware import JWTMiddleware
 
@@ -178,10 +178,12 @@ async def test_login(async_client):
 
     # 4. 验证返回结果（可能是注册成功或登录成功）
     assert isinstance(response_data["data"]["jwt_token"], str)
+    print(f"jwt_token: {response_data["data"]["jwt_token"]}")
 
     # 5. 验证 token 是否有效（需要直接访问 Redis）
     info_response = await async_client.post(
-        "/user/info", headers={"Authorization": f"Bearer {response_data['data']['jwt_token']}"}
+        # "/user/info", headers={"Authorization": f"Bearer {response_data['data']['jwt_token']}"}
+        "/user/info", headers={"Authorization": f"{response_data['data']['jwt_token']}"}
     )
     assert info_response.status_code == 200
     info_response_data = info_response.json()

@@ -5,7 +5,8 @@
 
 import asyncio
 import time
-from app.core import init_mysql_pool, close_mysql_pool, init_redis_pool, close_redis_pool
+from app.core.mysql import init_mysql_pool, close_mysql_pool
+from app.core.redis import init_redis_pool, close_redis_pool
 from app.core.mysql import AsyncSessionLocal
 from app.core.redis import get_redis_pool
 

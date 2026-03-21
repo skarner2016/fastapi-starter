@@ -4,7 +4,7 @@ import uuid
 from contextvars import ContextVar
 from datetime import datetime, timedelta
 from logging.handlers import TimedRotatingFileHandler
-from app.core import settings
+from app.core.config import settings
 
 # 全局上下文变量，存储当前请求的 trace_id
 trace_id_var: ContextVar[str] = ContextVar('trace_id', default=None)

@@ -46,7 +46,7 @@ def test_redis():
 @app.command()
 def test_mysql():
     """测试 MySQL 连接"""
-    from app.core import init_mysql_pool, close_mysql_pool
+    from app.core.mysql import init_mysql_pool, close_mysql_pool
     from app.core.mysql import AsyncSessionLocal
     from sqlalchemy import text
     
@@ -70,7 +70,7 @@ def get_user(
     email: Optional[str] = typer.Option(None, "--email", help="用户邮箱")
 ):
     """使用 ORM 获取用户数据"""
-    from app.core import init_mysql_pool, close_mysql_pool
+    from app.core.mysql import init_mysql_pool, close_mysql_pool
     from app.core.mysql import AsyncSessionLocal
     from app.models.user_model import UserModel
     from sqlalchemy import select

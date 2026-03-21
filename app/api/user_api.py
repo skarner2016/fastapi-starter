@@ -1,13 +1,12 @@
 import time
-from app.core import utils
 from app.core.context import get_redis_pool, get_mysql_pool, get_current_user_id
 from app.core.response import ApiResponseFail, ApiResponseSuccess
 from app.models.user_model import UserModel
 from sqlalchemy import select
 from app.schemas.user_schema import SMSCodeRequest, LoginRequest, InfoResponse
 from fastapi import APIRouter, Request
-from app.core.utils import generate_jwt_token
-from app.core import get_logger
+from app.core.utils import generate_jwt_token, generate_6_digit_code
+from app.core.logging import get_logger
 
 user_router = APIRouter(prefix="/user", tags=["user"])
 
@@ -17,7 +16,7 @@ logger = get_logger()
 @user_router.post("/sms-code")
 async def sms_code(request: SMSCodeRequest):
     """发送短信验证码"""
-    code = utils.generate_6_digit_code()
+    code = generate_6_digit_code()
     redis_conn = get_redis_pool()
     await redis_conn.set(request.email, code, ex=600)
 

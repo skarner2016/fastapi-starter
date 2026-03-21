@@ -2,7 +2,7 @@ from fastapi import Request, HTTPException
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 import jwt
-from app.core import settings
+from app.core.config import settings
 from app.core.context import set_current_user_id, reset_current_user_id, get_current_user_id
 
 

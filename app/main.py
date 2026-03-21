@@ -1,8 +1,10 @@
 from contextlib import asynccontextmanager
-from app.core import init_mysql_pool, close_mysql_pool, init_redis_pool, close_redis_pool, init_logging
+from app.core.mysql import init_mysql_pool, close_mysql_pool
+from app.core.redis import init_redis_pool, close_redis_pool
+from app.core.logging import init_logging
 from fastapi import FastAPI
-from app.api import api_router
-from app.core import settings
+from app.api.router import api_router
+from app.core.config import settings
 from app.core.exception import register_exceptions
 from app.middlewares.mysql_middleware import DBSessionMiddleware
 from app.middlewares.redis_middleware import RedisSessionMiddleware

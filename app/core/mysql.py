@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker, Session
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from app.core import settings
+from app.core.config import settings
 
 # 同步引擎（用于迁移）
 sync_engine = create_engine(

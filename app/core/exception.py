@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request, status, HTTPException
 from fastapi.exceptions import RequestValidationError
 from starlette.responses import JSONResponse
 
-from app.core import get_logger
+from app.core.logging import get_logger
 from app.schemas.error_code import ErrorCode
 
 
