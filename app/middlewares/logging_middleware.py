@@ -17,8 +17,10 @@ class LoggingMiddleware(BaseHTTPMiddleware):
     """
     
     async def dispatch(self, request: Request, call_next):
-        # 生成 trace_id
-        trace_id = str(uuid.uuid4())
+        # 获取或生成 trace_id 并设置
+        trace_id = request.headers.get("x-trace-id")
+        if not trace_id:
+            trace_id = str(uuid.uuid4())
         set_trace_id(trace_id)
         
         # 记录开始时间

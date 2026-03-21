@@ -3,6 +3,7 @@ from app.core import init_mysql_pool, close_mysql_pool, init_redis_pool, close_r
 from fastapi import FastAPI
 from app.api import api_router
 from app.core import settings
+from app.core.exception import register_exceptions
 from app.middlewares.mysql_middleware import DBSessionMiddleware
 from app.middlewares.redis_middleware import RedisSessionMiddleware
 from app.middlewares.logging_middleware import LoggingMiddleware
@@ -53,7 +54,10 @@ def init_app() -> FastAPI:
         description=f"{settings.app_name} API",
         lifespan=lifespan,
     )
-    
+
+    # 异常处理
+    register_exceptions(app)
+
     # 注意：FastAPI 中间件按添加的逆序执行
     # 最后添加的中间件会在最外层执行，其 finally 块最后执行
     
