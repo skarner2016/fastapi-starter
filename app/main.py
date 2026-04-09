@@ -85,18 +85,3 @@ def init_app() -> FastAPI:
 
 # Create app instance
 app = init_app()
-
-if __name__ == "__main__":
-    import uvicorn
-
-    print(f"Starting {settings.app_name} in {settings.app_env} mode")
-    
-    app_module = "app.main:app"
-    host = "0.0.0.0"
-    port = 8000
-    
-    # 根据环境配置参数
-    if settings.app_env != "prd":
-        uvicorn.run(app_module, host=host, port=port, reload=True, access_log=False)
-    else:
-        uvicorn.run(app_module, host=host, port=port, reload=False, workers=4, access_log=False)

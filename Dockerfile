@@ -8,17 +8,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Set uv link mode to copy to avoid hardlink warnings
-ENV UV_LINK_MODE=copy
-
-# 设置 pip 国内镜像
+# 设置 pip 国内镜像（非必要注释掉，会增大体积）
 RUN pip3 install numpy -i https://pypi.tuna.tsinghua.edu.cn/simple
 
-# 安装 uv
 RUN pip install uv
 
 # 设置工作目录
 WORKDIR /app
+
+COPY pyproject.toml uv.lock README.md ./
+
+#RUN uv sync
+RUN uv sync --frozen
+
+# Set uv link mode to copy to avoid hardlink warnings
+ENV UV_LINK_MODE=copy
 
 # 非root用户运行
 USER appuser

@@ -1,3 +1,5 @@
+import traceback
+
 from fastapi import FastAPI, Request, status, HTTPException
 from fastapi.exceptions import RequestValidationError
 from starlette.responses import JSONResponse
@@ -46,8 +48,10 @@ async def request_validation_exception_handler(request: Request, exc: RequestVal
 
 
 async def global_exception_handler(request: Request, exc: Exception):
-    # 向客户端返回一个通用的错误响应
-    get_logger(__name__).error(exc.__str__())
+    # 日志
+    get_logger().error(f"【global_exception_handler】{exc}\n{traceback.format_exc()}")
+
+    # 返回统一格式
     return JSONResponse(
         content={"code": ErrorCode.UNKNOWN, "message": "Unknown error", "data": {}}, status_code=status.HTTP_200_OK
     )
@@ -60,4 +64,20 @@ def register_exceptions(app: FastAPI) -> None:
     # 业务异常
     app.add_exception_handler(ApiBusinessException, api_business_exception_handler)
     app.add_exception_handler(RequestValidationError, request_validation_exception_handler)
-    app.add_exception_handler(Exception, global_exception_handler)
+    app.add_exception_handler(HTTPException, global_exception_handler)
+
+    @app.middleware("http")
+    async def catch_all_exceptions(request: Request, call_next):
+        try:
+            return await call_next(request)
+
+        # 捕获所有代码异常：raise Exception(...)
+        except Exception as exc:
+            # 记录日志
+            get_logger().error(f"【catch_all_exceptions】{exc}\n{traceback.format_exc()}")
+
+            # 返回统一格式
+            return JSONResponse(
+                content={"code": ErrorCode.UNKNOWN, "message": "Unknown error", "data": {}},
+                status_code=status.HTTP_200_OK
+            )
